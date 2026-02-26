@@ -547,6 +547,178 @@
       padding-top: 1.5rem;
     }
 
+    /* ── LIVE FEED PANEL ──────────────────────────────── */
+    .live-panel {
+      background: var(--bg-card2);
+      border: 1px solid rgba(79, 142, 247, 0.2);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .live-panel-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .port-select {
+      flex: 1;
+      min-width: 130px;
+      padding: 0.55rem 0.9rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .port-select:focus {
+      border-color: var(--accent);
+    }
+
+    .connect-btn {
+      padding: 0.55rem 1.3rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .connect-btn.connect {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 2px 12px var(--glow-blue);
+    }
+
+    .connect-btn.disconnect {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .connect-btn:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 99px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+
+    .live-badge.connected {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: var(--green);
+    }
+
+    .live-badge.disconnected {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--red);
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .live-badge.connected .live-dot {
+      background: var(--green);
+      animation: pulse 1.8s infinite;
+    }
+
+    .live-badge.disconnected .live-dot {
+      background: var(--red);
+    }
+
+    .auto-predict-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* toggle switch */
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .toggle-switch input {
+      display: none;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      transition: background 0.25s;
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      transition: transform 0.25s, background 0.25s;
+    }
+
+    .toggle-switch input:checked~.toggle-track {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle-switch input:checked~.toggle-thumb {
+      transform: translateX(16px);
+      background: #fff;
+    }
+
+    /* live result overlay */
+    #liveResultBar {
+      display: none;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border-radius: 10px;
+      background: rgba(79, 142, 247, 0.07);
+      border: 1px solid rgba(79, 142, 247, 0.15);
+      font-size: 0.82rem;
+    }
+
     @media (max-width: 768px) {
 
       .grid-3,
@@ -577,6 +749,46 @@
   </header>
 
   <main>
+
+    <!-- ══ LIVE ESP32 FEED PANEL ══════════════════════════════════════ -->
+    <div class="live-panel" id="livePanel">
+      <div class="live-panel-title">📡 Live ESP32 Feed</div>
+
+      <select class="port-select" id="portSelect">
+        <option value="">Loading ports…</option>
+      </select>
+      <button class="connect-btn" id="refreshBtn" onclick="loadPorts()" title="Refresh port list"
+        style="padding:0.55rem 0.7rem;background:rgba(79,142,247,0.12);color:var(--accent);border:1px solid rgba(79,142,247,0.25);border-radius:10px;font-size:0.88rem;cursor:pointer;">🔄</button>
+
+      <!-- Manual port entry (shown when auto-detect finds nothing) -->
+      <div id="manualPortWrap" style="display:none;align-items:center;gap:0.4rem;">
+        <input id="manualPort" type="text" placeholder="e.g. COM4" value="COM4"
+          style="width:90px;padding:0.5rem 0.7rem;background:rgba(255,255,255,0.04);border:1px solid rgba(79,142,247,0.3);border-radius:10px;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.85rem;outline:none;">
+      </div>
+
+      <button class="connect-btn connect" id="connectBtn" onclick="toggleConnect()">Connect</button>
+
+      <div class="live-badge disconnected" id="liveBadge">
+        <div class="live-dot"></div>
+        <span id="liveStatus">Disconnected</span>
+      </div>
+
+      <label class="auto-predict-wrap" title="Automatically run ML prediction on each new reading">
+        <span>Auto-Predict</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoPredictToggle">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </label>
+
+      <!-- live prediction result bar (shown when auto-predict is ON) -->
+      <div id="liveResultBar">
+        <span id="liveResultText" style="font-family:'JetBrains Mono',monospace;font-weight:700;">—</span>
+        <span id="liveStatusText" style="font-weight:600;">—</span>
+        <span style="color:var(--text-secondary);font-size:0.75rem;margin-left:auto;">Live AI result</span>
+      </div>
+    </div>
 
     <!-- SENSOR INPUT CARDS -->
     <div class="section-title">📡 IoT Sensor Input</div>
@@ -826,7 +1038,174 @@
   </main>
 
   <script>
-    // ─── UPDATE SENSOR PREVIEW CARDS ───────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    //  LIVE ESP32 SERIAL FEED
+    // ══════════════════════════════════════════════════════════════════════
+    let _isConnected = false;
+    let _pollTimer = null;
+    let _autoPredictTimer = null;
+
+    // ── Load COM ports ────────────────────────────────────────────────────
+    async function loadPorts() {
+      const sel = document.getElementById('portSelect');
+      sel.innerHTML = '<option value="">Scanning…</option>';
+      try {
+        const res = await fetch('/serial/ports');
+        const data = await res.json();
+        if (data.error) console.warn('[Ports]', data.error);
+        if (data.ports && data.ports.length > 0) {
+          sel.innerHTML = data.ports.map(p =>
+            `<option value="${p}">${p}</option>`
+          ).join('');
+          // auto-select COM4 if present
+          const com4 = data.ports.find(p => p.toUpperCase() === 'COM4');
+          if (com4) sel.value = com4;
+        } else {
+          // No ports detected — let user type manually
+          sel.innerHTML = '<option value="">— type port below —</option>';
+          document.getElementById('manualPortWrap').style.display = 'flex';
+        }
+      } catch (e) {
+        sel.innerHTML = '<option value="">Error scanning</option>';
+        document.getElementById('manualPortWrap').style.display = 'flex';
+      }
+    }
+
+    // Get the effective port (dropdown or manual input)
+    function getSelectedPort() {
+      const sel = document.getElementById('portSelect').value;
+      const manual = document.getElementById('manualPort').value.trim();
+      return sel || manual;
+    }
+
+    loadPorts();
+
+    // ── Connect / Disconnect ──────────────────────────────────────────────
+    async function toggleConnect() {
+      if (_isConnected) {
+        await fetch('/serial/disconnect', { method: 'POST' });
+        setConnected(false);
+        stopPolling();
+      } else {
+        const port = getSelectedPort();
+        if (!port) { alert('Please select a COM port.'); return; }
+        const btn = document.getElementById('connectBtn');
+        btn.textContent = 'Connecting…';
+        btn.disabled = true;
+        try {
+          const res = await fetch('/serial/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ port })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            setConnected(true);
+            startPolling();
+          } else {
+            alert('Could not connect: ' + (data.error || 'unknown error'));
+            setConnected(false);
+          }
+        } catch (e) {
+          alert('Connection failed: ' + e);
+          setConnected(false);
+        }
+        btn.disabled = false;
+      }
+    }
+
+    function setConnected(state) {
+      _isConnected = state;
+      const badge = document.getElementById('liveBadge');
+      const status = document.getElementById('liveStatus');
+      const btn = document.getElementById('connectBtn');
+      if (state) {
+        badge.className = 'live-badge connected';
+        status.textContent = 'Connected';
+        btn.textContent = 'Disconnect';
+        btn.className = 'connect-btn disconnect';
+      } else {
+        badge.className = 'live-badge disconnected';
+        status.textContent = 'Disconnected';
+        btn.textContent = 'Connect';
+        btn.className = 'connect-btn connect';
+        document.getElementById('liveResultBar').style.display = 'none';
+      }
+    }
+
+    // ── Polling ────────────────────────────────────────────────────────────
+    function startPolling() { _pollTimer = setInterval(pollSerial, 2000); pollSerial(); }
+    function stopPolling() { clearInterval(_pollTimer); }
+
+    async function pollSerial() {
+      try {
+        const res = await fetch('/serial/data');
+        const data = await res.json();
+
+        if (!data.connected) { setConnected(false); stopPolling(); return; }
+
+        // Update sensor preview cards + form inputs
+        if (data.temperature !== null) applyTemp(data.temperature);
+        if (data.gas !== null) applyGas(data.gas);
+        if (data.moisture !== null) applyMoisture(data.moisture);
+
+        // Auto-predict
+        if (document.getElementById('autoPredictToggle').checked) {
+          runLivePredict(data);
+        }
+      } catch (e) { /* server not ready yet */ }
+    }
+
+    function applyTemp(t) {
+      document.getElementById('temp').value = t.toFixed(2);
+      document.getElementById('prev-temp').innerHTML =
+        t.toFixed(1) + '<span class="sensor-unit">°C</span>';
+      document.getElementById('bar-temp').style.width = Math.min(100, (t / 60) * 100) + '%';
+    }
+
+    function applyGas(g) {
+      document.getElementById('gas').value = g;
+      document.getElementById('prev-gas').innerHTML =
+        g + '<span class="sensor-unit">idx</span>';
+      document.getElementById('bar-gas').style.width = Math.min(100, (g / 3500) * 100) + '%';
+    }
+
+    function applyMoisture(m) {
+      document.getElementById('moisture').value = m.toFixed(2);
+      document.getElementById('prev-moist').innerHTML =
+        m.toFixed(1) + '<span class="sensor-unit">%</span>';
+      document.getElementById('bar-moist').style.width = Math.min(100, m) + '%';
+    }
+
+    // ── Auto-predict (calls /serial/predict, no page reload) ──────────────
+    async function runLivePredict(data) {
+      try {
+        const res = await fetch('/serial/predict', { method: 'POST' });
+        const pred = await res.json();
+        if (!pred.ok) return;
+
+        const bar = document.getElementById('liveResultBar');
+        const rtxt = document.getElementById('liveResultText');
+        const stxt = document.getElementById('liveStatusText');
+        const colorMap = { green: '#22c55e', orange: '#f59e0b', red: '#ef4444' };
+        const c = colorMap[pred.color] || '#4f8ef7';
+
+        rtxt.textContent = pred.result + '%';
+        rtxt.style.color = c;
+        stxt.textContent = (pred.color === 'green' ? '✅' : pred.color === 'orange' ? '⚠️' : '🚨') + ' ' + pred.status;
+        stxt.style.color = c;
+        bar.style.display = 'flex';
+      } catch (e) { }
+    }
+
+    // auto-predict toggle shows/hides result bar
+    document.getElementById('autoPredictToggle').addEventListener('change', function () {
+      if (!this.checked) document.getElementById('liveResultBar').style.display = 'none';
+    });
+
+    // ══════════════════════════════════════════════════════════════════════
+    //  UPDATE SENSOR PREVIEW CARDS (manual input listener)
+    // ══════════════════════════════════════════════════════════════════════
     const tempInput = document.getElementById('temp');
     const gasInput = document.getElementById('gas');
     const moistInput = document.getElementById('moisture');
