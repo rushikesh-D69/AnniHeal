@@ -4,12 +4,12 @@ AnniHeal is an IoT + Machine Learning system that detects wound infection risk i
 
 ---
 
-## 🚀 Features
+##  Features
 
-- 📡 **IoT Sensor Integration** — Reads Temperature (°C), Gas Index, and Moisture (%) from ESP32-based hardware
-- 🤖 **ML Prediction** — Random Forest Regressor trained on real wound-sensor data, outputs a 0–100% infection risk score
-- 📊 **Live Web Dashboard** — Interactive Flask dashboard with gauge chart, bar chart, and sensor preview cards
-- 🎨 **Dark Mode UI** — Responsive, glassmorphism-style interface with risk-level color coding
+-  **IoT Sensor Integration** — Reads Temperature (°C), Gas Index, and Moisture (%) from ESP32-based hardware
+-  **ML Prediction** — Random Forest Regressor trained on real wound-sensor data, outputs a 0–100% infection risk score
+-  **Live Web Dashboard** — Interactive Flask dashboard with gauge chart, bar chart, and sensor preview cards
+-  **Dark Mode UI** — Responsive, glassmorphism-style interface with risk-level color coding
 
 ---
 
@@ -25,7 +25,7 @@ AnniHeal is an IoT + Machine Learning system that detects wound infection risk i
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 AnniHeal/
@@ -73,7 +73,7 @@ http://127.0.0.1:5000
 
 ---
 
-## 🔬 How It Works
+## How It Works
 
 1. Sensor readings (Temperature, Gas Index, Moisture) are entered manually or streamed from ESP32 hardware.
 2. The Flask backend passes the values to the trained `RandomForestRegressor` model.
@@ -82,9 +82,9 @@ http://127.0.0.1:5000
 
 | Risk Level | Score Range | Action |
 |---|---|---|
-| ✅ Low Risk | 0 – 39% | Monitor normally |
-| ⚠️ Moderate Risk | 40 – 69% | Increase monitoring |
-| 🚨 High Risk | 70 – 100% | Immediate attention! |
+|  Low Risk | 0 – 39% | Monitor normally |
+|  Moderate Risk | 40 – 69% | Increase monitoring |
+|  High Risk | 70 – 100% | Immediate attention! |
 
 ---
 
@@ -92,23 +92,20 @@ http://127.0.0.1:5000
 
 | Feature | Importance |
 |---|---|
-| 🌡️ Temperature (°C) | ~52% |
-| 💨 Gas Index | ~31% |
-| 💧 Moisture (%) | ~17% |
+|  Temperature (°C) | ~52% |
+|  Gas Index | ~31% |
+|  Moisture (%) | ~17% |
 
 ---
 
-## ⚠️ Notes
+##  Notes
 
 - The trained model (`trained_model.pkl`) was serialized with **scikit-learn 1.6.1**. If you're running a newer version, you may see a version mismatch warning — the model will still work but retraining is recommended for production use.
 - This is a development server. For production deployment, use a WSGI server like **Gunicorn**.
 
----
 
-## 👤 Author
-
-**Rushikesh** — [GitHub](https://github.com/rushikesh-D69)
 
 ---
 
 *AnniHeal · Powered by scikit-learn Random Forest · IoT-based Wound Monitoring System*
+
