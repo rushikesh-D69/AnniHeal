@@ -1,21 +1,71 @@
 # 🩹 AnniHeal — AI-Powered Wound Infection Risk Monitor
 
-## 🚀 The Problem
-Post-surgical and diabetic wounds often become severely infected before visible symptoms (redness, swelling) appear, leading to delayed treatment and severe complications. Millions of patients suffer from diabetic foot ulcers or surgical site infections annually, costing billions and leading to severe complications like amputations. Current detection relies on visual inspection—which is often too late.
+---
 
-## 💡 The Solution (How it works)
+##  Scientific Background
+
+Wound infections, particularly in post-surgical and diabetic patients, often begin with subtle biochemical and physiological changes before visible clinical symptoms appear.
+
+According to the World Health Organization (WHO), surgical site infections remain one of the most common healthcare-associated infections globally. Early infection stages involve:
+
+-  Localized temperature elevation due to inflammatory response  
+-  Increased volatile organic compound (VOC) emissions from bacterial metabolism  
+-  Altered moisture levels caused by increased wound exudate  
+
+Visible symptoms such as redness, swelling, pain, and pus formation typically occur **after** microbial colonization has progressed.
+
+**AnniHeal focuses on detecting these pre-clinical micro-environment changes using multi-sensor fusion and AI-based pattern recognition.**
+
+---
+
+##  The Problem
+
+Post-surgical and diabetic wounds often become severely infected before visible symptoms (redness, swelling) appear, leading to delayed treatment and severe complications.
+
+Millions of patients suffer from:
+- Diabetic foot ulcers  
+- Surgical site infections  
+
+These complications can result in:
+- Extended hospital stays  
+- High treatment costs  
+- Amputations in severe cases  
+
+Current detection methods rely heavily on visual inspection and subjective clinical judgment—which is often reactive rather than proactive.
+
+---
+
+##  The Solution (How it Works)
+
 AnniHeal is an IoT + Machine Learning system that detects wound infection risk in real time using a smart wearable patch.
 
-- **Hardware:** Smart bandage integrating Temperature, Gas (VOC/Ammonia), and Moisture sensors.
-- **AI / Software:** Machine learning model (Random Forest) analyzes the real-time wound micro-environment to detect anomalies and generate an "Infection Risk Score."
-- **Output:** Live dashboard and instant phone alerts to patients and caregivers for early intervention.
+### 🩹 Hardware Layer
+Smart bandage integrating:
+-  Temperature sensor  
+-  Gas sensor (VOC / Ammonia detection)  
+-  Moisture sensor  
 
-## 🏆 Why it wins
-✔ **Proactive vs Reactive:** Non-invasive, continuous monitoring catches infections *before* they are critically dangerous.
-✔ **Hardware + AI Synergy:** Leverages cheap IoT sensors powered by advanced predictive AI.
-✔ **Actionable Insight:** Real-time dashboard and instant mobile alerts for clinical staff/caregivers, enabling early intervention (e.g., proactive antibiotic administration or dressing changes).
-✔ **Market Potential:** Solves a multi-billion dollar healthcare problem with scalable, low-cost sensor integration.
-✔ **Strong Branding:** "AnniHealaters" branding is finalized and memorable.
+These sensors monitor the wound micro-environment continuously.
+
+### 🧠 AI / Software Layer
+A trained **Random Forest Regressor** analyzes sensor data patterns and outputs an:
+
+> 📊 Infection Risk Score (0–100%)
+
+The model performs multivariate analysis on:
+- Temperature drift
+- Gas emission changes
+- Moisture fluctuations
+
+Instead of simple threshold detection, AnniHeal uses predictive modeling for anomaly recognition.
+
+### 📱 Output Layer
+- Live monitoring dashboard  
+- Real-time risk visualization  
+- Phone alerts for patients and caregivers  
+
+---
+
 
 ---
 
@@ -27,32 +77,8 @@ AnniHeal is an IoT + Machine Learning system that detects wound infection risk i
 | ML Model | Python, scikit-learn (RandomForestRegressor) |
 | Backend | Python, Flask |
 | Frontend | HTML, CSS, JavaScript, Chart.js |
-| Data | Pandas, NumPy, Joblib |
-
----
-
-## ⚙️ Setup & Run
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/rushikesh-D69/AnniHeal.git
-cd AnniHeal
-```
-
-### 2. Install Python dependencies
-```bash
-pip install flask scikit-learn numpy pandas joblib
-```
-
-### 3. Run the dashboard
-```bash
-python dashboard/app.py
-```
-
-### 4. Open in browser
-```
-http://127.0.0.1:5000
-```
+| Data Processing | Pandas, NumPy |
+| Model Persistence | Joblib |
 
 ---
 
@@ -63,12 +89,56 @@ http://127.0.0.1:5000
 3. The model outputs a **risk score (0–100%)**.
 4. The dashboard classifies the score:
 
-| Risk Level | Score Range | Action |
+| Risk Level | Score Range | Recommended Action |
 |---|---|---|
-| 🟢 Low Risk | 0 – 39% | Monitor normally |
-| 🟡 Moderate Risk | 40 – 69% | Increase monitoring |
-| 🔴 High Risk | 70 – 100% | Immediate attention! |
+| 🟢 Low Risk | 0 – 39% | Routine monitoring |
+| 🟡 Moderate Risk | 40 – 69% | Increased observation |
+| 🔴 High Risk | 70 – 100% | Immediate medical attention |
 
 ---
 
-*AnniHeal · IoT-based Wound Monitoring System · Hackathon Pitch Version*
+## 🧪 Dataset Note
+
+Currently, the model is trained on a controlled experimental dataset simulating wound micro-environment variations.  
+
+Future work includes:
+- Clinical data validation  
+- Real-world wound monitoring trials  
+- Expansion to time-series deep learning models  
+- TinyML deployment for on-device inference  
+
+---
+
+## ⚙️ Setup & Run
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/rushikesh-D69/AnniHeal.git
+cd AnniHeal
+```
+
+### 2️⃣ Install Python dependencies
+```bash
+pip install flask scikit-learn numpy pandas joblib
+```
+
+### 3️⃣ Run the dashboard
+```bash
+python dashboard/app.py
+```
+
+### 4️⃣ Open in browser
+```
+http://127.0.0.1:5000
+```
+
+---
+
+##  Disclaimer
+
+AnniHeal is a research prototype and decision-support system.  
+It is **not a certified medical diagnostic device** and requires clinical validation before deployment in healthcare settings.
+
+---
+
+**AnniHeal · AI-Enabled IoT Wound Monitoring System · Hackathon / Research Prototype Version**
