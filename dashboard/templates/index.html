@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnniHeal — Wound Infection Risk Monitor</title>
+  <meta name="description"
+    content="AnniHeal AI-powered wound infection risk monitor using IoT sensors and a trained ML model.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0d14;
+      --bg-card: #111520;
+      --bg-card2: #161b2e;
+      --accent: #4f8ef7;
+      --accent2: #7c5cbf;
+      --green: #22c55e;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --text-primary: #e8eaf0;
+      --text-secondary: #8b92a8;
+      --border: rgba(255, 255, 255, 0.06);
+      --glow-blue: rgba(79, 142, 247, 0.18);
+      --glow-green: rgba(34, 197, 94, 0.18);
+      --glow-red: rgba(239, 68, 68, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(79, 142, 247, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(124, 92, 191, 0.08) 0%, transparent 60%);
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 21, 32, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 20px var(--glow-blue);
+    }
+
+    .logo h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 99px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--green);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.8);
+      }
+    }
+
+    /* MAIN LAYOUT */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* GRID LAYOUTS */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .grid-3-1 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1.8rem;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(79, 142, 247, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* SENSOR CARDS */
+    .sensor-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sensor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sensor-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .sensor-icon.temp {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .sensor-icon.gas {
+      background: rgba(79, 142, 247, 0.15);
+    }
+
+    .sensor-icon.moist {
+      background: rgba(34, 197, 94, 0.15);
+    }
+
+    .sensor-label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .sensor-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sensor-unit {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-left: 2px;
+    }
+
+    .sensor-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .sensor-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* PREDICTION FORM */
+    .predict-card {
+      background: var(--bg-card2);
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .sensor-input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: 'JetBrains Mono', monospace;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .sensor-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--glow-blue);
+    }
+
+    .input-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      flex-shrink: 0;
+    }
+
+    .predict-btn {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.3s;
+      box-shadow: 0 4px 20px var(--glow-blue);
+      margin-top: 1.2rem;
+    }
+
+    .predict-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px var(--glow-blue);
+    }
+
+    .predict-btn:active {
+      transform: translateY(0);
+    }
+
+    /* RESULT PANEL */
+    .result-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      min-height: 250px;
+    }
+
+    .gauge-wrap {
+      position: relative;
+      width: 160px;
+      height: 160px;
+    }
+
+    canvas#gaugeCanvas {
+      width: 160px;
+      height: 160px;
+    }
+
+    .gauge-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-pct {
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1;
+    }
+
+    .gauge-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .risk-badge {
+      padding: 0.5rem 1.5rem;
+      border-radius: 99px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .risk-low {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .risk-medium {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--orange);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .risk-high {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .no-result {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .no-result .icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      opacity: 0.4;
+    }
+
+    /* MODEL INFO */
+    .model-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .model-stat:last-child {
+      margin-bottom: 0;
+    }
+
+    .mstat-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(79, 142, 247, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .mstat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .mstat-value {
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(79, 142, 247, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(79, 142, 247, 0.2);
+    }
+
+    /* CHART */
+    .chart-container {
+      position: relative;
+      height: 190px;
+    }
+
+    /* RISK THRESHOLDS TABLE */
+    .threshold-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .threshold-table th {
+      text-align: left;
+      color: var(--text-secondary);
+      font-weight: 500;
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .threshold-table td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .threshold-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    /* FEATURE IMPORTANCE */
+    .feat-row {
+      margin-bottom: 0.9rem;
+    }
+
+    .feat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .feat-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.35rem;
+      font-size: 0.8rem;
+    }
+
+    .feat-name {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .feat-pct {
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .feat-bar-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .feat-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* FOOTER */
+    .footer-note {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+
+      .grid-3,
+      .grid-2,
+      .grid-3-1 {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding: 1rem 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🩹</div>
+      <h1>Anni<span>Heal</span></h1>
+    </div>
+    <div style="font-size:0.78rem;color:var(--text-secondary);">Wound Infection Risk Monitor</div>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      ML Model Online
+    </div>
+  </header>
+
+  <main>
+
+    <!-- SENSOR INPUT CARDS -->
+    <div class="section-title">📡 IoT Sensor Input</div>
+    <div class="grid-3" id="sensorPreview">
+
+      <div class="card sensor-card">
+        <div class="sensor-header">
+          <div class="sensor-icon temp">🌡️</div>
+          <span class="sensor-label">Temperature</span>
+        </div>
+        <div class="sensor-value" id="prev-temp">—<span class="sensor-unit">°C</span></div>
+        <div class="sensor-bar">
+          <div class="sensor-bar-fill" id="bar-temp" style="width:0%;background:linear-gradient(90deg,#f59e0b,#ef4444)">
+          </div>
+        </div>
+      </div>
+
+      <div class="card sensor-card">
+        <div class="sensor-header">
+          <div class="sensor-icon gas">💨</div>
+          <span class="sensor-label">Gas Index</span>
+        </div>
+        <div class="sensor-value" id="prev-gas">—<span class="sensor-unit">idx</span></div>
+        <div class="sensor-bar">
+          <div class="sensor-bar-fill" id="bar-gas" style="width:0%;background:linear-gradient(90deg,#4f8ef7,#7c5cbf)">
+          </div>
+        </div>
+      </div>
+
+      <div class="card sensor-card">
+        <div class="sensor-header">
+          <div class="sensor-icon moist">💧</div>
+          <span class="sensor-label">Moisture</span>
+        </div>
+        <div class="sensor-value" id="prev-moist">—<span class="sensor-unit">%</span></div>
+        <div class="sensor-bar">
+          <div class="sensor-bar-fill" id="bar-moist"
+            style="width:0%;background:linear-gradient(90deg,#22c55e,#4f8ef7)"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PREDICT + RESULT -->
+    <div class="section-title">🤖 ML Prediction</div>
+    <div class="grid-2">
+
+      <!-- INPUT FORM -->
+      <div class="card predict-card">
+        <p style="font-weight:600;margin-bottom:1.2rem;">Enter Sensor Readings</p>
+        <form method="POST" action="/predict" id="predictForm">
+
+          <div class="input-group">
+            <label class="input-label" for="temp">🌡️ Temperature (°C)</label>
+            <div class="input-row">
+              <input class="sensor-input" type="number" step="0.01" name="temp" id="temp" placeholder="e.g. 37.0"
+                required value="{{ request.form.get('temp', '') }}">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="gas">💨 Gas Index</label>
+            <div class="input-row">
+              <input class="sensor-input" type="number" step="any" name="gas" id="gas" placeholder="e.g. 1713" required
+                value="{{ request.form.get('gas', '') }}">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="moisture">💧 Moisture (%)</label>
+            <div class="input-row">
+              <input class="sensor-input" type="number" step="any" name="moisture" id="moisture" placeholder="e.g. 55.0"
+                required value="{{ request.form.get('moisture', '') }}">
+            </div>
+          </div>
+
+          <button class="predict-btn" type="submit">⚡ Analyze Infection Risk</button>
+        </form>
+      </div>
+
+      <!-- RESULT PANEL -->
+      <div class="card" style="display:flex;flex-direction:column;">
+        <p style="font-weight:600;margin-bottom:1rem;">Prediction Result</p>
+        <div class="result-panel">
+          {% if result %}
+          <div class="gauge-wrap">
+            <canvas id="gaugeCanvas" width="160" height="160"></canvas>
+            <div class="gauge-center">
+              <span class="gauge-pct" style="color:{{ color }}">{{ result }}%</span>
+              <span class="gauge-label">Risk Score</span>
+            </div>
+          </div>
+          <div class="risk-badge
+            {% if color == 'green' %}risk-low{% elif color == 'orange' %}risk-medium{% else %}risk-high{% endif %}">
+            {% if color == 'green' %}✅{% elif color == 'orange' %}⚠️{% else %}🚨{% endif %}
+            {{ status }}
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);text-align:center;">
+            Based on: Temp={{ request.form.get('temp') }}°C &nbsp;|&nbsp;
+            Gas={{ request.form.get('gas') }} &nbsp;|&nbsp;
+            Moisture={{ request.form.get('moisture') }}%
+          </div>
+          {% else %}
+          <div class="no-result">
+            <span class="icon">🔬</span>
+            Enter sensor values and press<br><strong>Analyze Infection Risk</strong><br>to get a prediction.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODEL INFO + THRESHOLDS -->
+    <div class="section-title">📊 Model & Risk Reference</div>
+    <div class="grid-3-1">
+
+      <!-- RISK HISTORY CHART -->
+      <div class="card">
+        <p style="font-weight:600;margin-bottom:1rem;">📈 Risk Level Guide</p>
+        <div class="chart-container">
+          <canvas id="riskChart"></canvas>
+        </div>
+      </div>
+
+      <!-- MODEL INFO -->
+      <div class="card">
+        <p style="font-weight:600;margin-bottom:1rem;">🧠 Model Info</p>
+        <div class="model-stat">
+          <div class="mstat-icon">⚙️</div>
+          <div>
+            <div class="mstat-label">Algorithm</div>
+            <div class="mstat-value">Random Forest <span class="tag">Regression</span></div>
+          </div>
+        </div>
+        <div class="model-stat">
+          <div class="mstat-icon">📦</div>
+          <div>
+            <div class="mstat-label">Library</div>
+            <div class="mstat-value">scikit-learn</div>
+          </div>
+        </div>
+        <div class="model-stat">
+          <div class="mstat-icon">📡</div>
+          <div>
+            <div class="mstat-label">Features</div>
+            <div class="mstat-value">3 IoT Sensors</div>
+          </div>
+        </div>
+        <div class="model-stat">
+          <div class="mstat-icon">📋</div>
+          <div>
+            <div class="mstat-label">Training Samples</div>
+            <div class="mstat-value">158 records</div>
+          </div>
+        </div>
+        <div class="model-stat">
+          <div class="mstat-icon">🎯</div>
+          <div>
+            <div class="mstat-label">Output</div>
+            <div class="mstat-value">Risk Score (0–100%)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FEATURE IMPORTANCE + THRESHOLDS -->
+    <div class="grid-2">
+
+      <!-- FEATURE IMPORTANCE -->
+      <div class="card">
+        <p style="font-weight:600;margin-bottom:1.2rem;">📌 Feature Importance (Estimated)</p>
+        <div class="feat-row">
+          <div class="feat-meta">
+            <span class="feat-name">🌡️ Temperature (°C)</span>
+            <span class="feat-pct">52%</span>
+          </div>
+          <div class="feat-bar-bg">
+            <div class="feat-bar-fill" style="width:52%"></div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-meta">
+            <span class="feat-name">💨 Gas Index</span>
+            <span class="feat-pct">31%</span>
+          </div>
+          <div class="feat-bar-bg">
+            <div class="feat-bar-fill" style="width:31%;background:linear-gradient(90deg,#4f8ef7,#22c55e)"></div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-meta">
+            <span class="feat-name">💧 Moisture (%)</span>
+            <span class="feat-pct">17%</span>
+          </div>
+          <div class="feat-bar-bg">
+            <div class="feat-bar-fill" style="width:17%;background:linear-gradient(90deg,#22c55e,#7c5cbf)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RISK THRESHOLDS -->
+      <div class="card">
+        <p style="font-weight:600;margin-bottom:1.2rem;">🎯 Risk Classification Thresholds</p>
+        <table class="threshold-table">
+          <thead>
+            <tr>
+              <th>Risk Level</th>
+              <th>Score Range</th>
+              <th>Recommended Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="dot" style="background:var(--green)"></span>Low Risk</td>
+              <td style="font-family:JetBrains Mono,monospace">0 – 39%</td>
+              <td style="color:var(--text-secondary)">Monitor normally</td>
+            </tr>
+            <tr>
+              <td><span class="dot" style="background:var(--orange)"></span>Moderate Risk</td>
+              <td style="font-family:JetBrains Mono,monospace">40 – 69%</td>
+              <td style="color:var(--text-secondary)">Increase monitoring</td>
+            </tr>
+            <tr>
+              <td><span class="dot" style="background:var(--red)"></span>High Risk</td>
+              <td style="font-family:JetBrains Mono,monospace">70 – 100%</td>
+              <td style="color:var(--text-secondary)">Immediate attention!</td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          style="margin-top:1.2rem;padding:0.8rem;background:rgba(79,142,247,0.06);border-radius:10px;border:1px solid rgba(79,142,247,0.15);">
+          <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.6;">
+            <strong style="color:var(--accent);">ⓘ How it works:</strong> The ML model correlates wound-area
+            temperature, surrounding gas emissions, and moisture levels to estimate infection probability.
+            Higher temperature + high gas index = elevated risk.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-note">
+      AnniHeal Dashboard · Powered by scikit-learn Random Forest · IoT-based Wound Monitoring System
+    </div>
+  </main>
+
+  <script>
+    // ─── UPDATE SENSOR PREVIEW CARDS ───────────────────────────────────────
+    const tempInput = document.getElementById('temp');
+    const gasInput = document.getElementById('gas');
+    const moistInput = document.getElementById('moisture');
+
+    function updatePreviews() {
+      const t = parseFloat(tempInput.value);
+      const g = parseFloat(gasInput.value);
+      const m = parseFloat(moistInput.value);
+      if (!isNaN(t)) {
+        document.getElementById('prev-temp').innerHTML = t.toFixed(1) + '<span class="sensor-unit">°C</span>';
+        document.getElementById('bar-temp').style.width = Math.min(100, (t / 60) * 100) + '%';
+      }
+      if (!isNaN(g)) {
+        document.getElementById('prev-gas').innerHTML = g + '<span class="sensor-unit">idx</span>';
+        document.getElementById('bar-gas').style.width = Math.min(100, (g / 3500) * 100) + '%';
+      }
+      if (!isNaN(m)) {
+        document.getElementById('prev-moist').innerHTML = m.toFixed(1) + '<span class="sensor-unit">%</span>';
+        document.getElementById('bar-moist').style.width = Math.min(100, m) + '%';
+      }
+    }
+
+    tempInput.addEventListener('input', updatePreviews);
+    gasInput.addEventListener('input', updatePreviews);
+    moistInput.addEventListener('input', updatePreviews);
+    // Pre-fill if form was submitted
+    updatePreviews();
+
+    // ─── GAUGE CHART ──────────────────────────────────────────────────────
+    {% if result %}
+    (function () {
+      const pct = {{ result }};
+    const color = '{{ color }}';
+    const colorMap = { green: '#22c55e', orange: '#f59e0b', red: '#ef4444' };
+    const c = colorMap[color] || '#4f8ef7';
+    const gaugeCtx = document.getElementById('gaugeCanvas').getContext('2d');
+    new Chart(gaugeCtx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [pct, 100 - pct],
+          backgroundColor: [c, 'rgba(255,255,255,0.05)'],
+          borderWidth: 0,
+          circumference: 270,
+          rotation: -135,
+        }]
+      },
+      options: {
+        cutout: '75%',
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 800, easing: 'easeInOutQuart' },
+      }
+    });
+    }) ();
+    {% endif %}
+
+    // ─── RISK LEVEL REFERENCE BAR CHART ────────────────────────────────────
+    (function () {
+      const riskCtx = document.getElementById('riskChart').getContext('2d');
+      new Chart(riskCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Low\n(0-39%)', 'Moderate\n(40-69%)', 'High\n(70-100%)'],
+          datasets: [{
+            label: 'Risk Range Upper Bound',
+            data: [39, 69, 100],
+            backgroundColor: [
+              'rgba(34,197,94,0.25)',
+              'rgba(245,158,11,0.25)',
+              'rgba(239,68,68,0.25)',
+            ],
+            borderColor: ['#22c55e', '#f59e0b', '#ef4444'],
+            borderWidth: 2,
+            borderRadius: 8,
+          }{% if result %}, {
+        label: 'Your Reading',
+        data: [
+          {% if result <= 39 %}{{ result }}, null, null
+              {% elif result <= 69 %} null, {{ result }}, null
+    {% else %} null, null, {{ result }}{% endif %}
+            ],
+    backgroundColor: 'rgba(79,142,247,0.7)',
+      borderColor: '#4f8ef7',
+        borderWidth: 2,
+          borderRadius: 8,
+          }{% endif %}]
+        },
+    options: {
+      responsive: true,
+        maintainAspectRatio: false,
+          plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ti => ti.parsed.y !== null ? `${ti.parsed.y.toFixed(1)}%` : ''
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#8b92a8', font: { size: 11 } },
+        },
+        y: {
+          min: 0, max: 105,
+            grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#8b92a8', callback: v => v + '%', font: { size: 11 } },
+        }
+      }
+    }
+      });
+    }) ();
+  </script>
+
+</body>
+
+</html>
